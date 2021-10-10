@@ -8,7 +8,7 @@ monet = "aave"
 days = 365
 urlRequest = "https://api.coingecko.com/api/v3/coins/"+monet+"/ohlc?vs_currency=usd&days="+ str(days)
 APIanswer = requests.get(urlRequest)
-namedir = monet+" for "+str(days)+" days"
+namedir = monet+"_for_"+str(days)+"_days"
 filename=monet+"_OHLC_"+str(days)+".json"
 filewithpath = namedir + "/" + filename
 try:
@@ -23,3 +23,5 @@ os.mkdir(namedir)
 file_result = APIanswer.text
 with open(filewithpath, "w") as fi:
     fi.write(file_result)
+#
+
