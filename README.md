@@ -1,5 +1,5 @@
-# Team1
-========================
+# Team 1
+
 The most friendly team
 
 ## Tasks
