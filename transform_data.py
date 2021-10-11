@@ -14,7 +14,6 @@ def write_data_in_file(data_list: list) -> None:
     """Write result data in file."""
 
     file_name = uuid.uuid4().hex
-
     with open(f"data_result/{file_name}.json", "w", encoding='utf-8') as file_json:
         json.dump(data_list, file_json)
 
@@ -40,9 +39,6 @@ def split_data(data_sourse: list) -> None:
             write_data_in_file(list_result)
             list_result.clear()
 
-    if len(list_result) > 0:
-        write_data_in_file(list_result)
-
     print("Split complete")
 
 
@@ -53,3 +49,4 @@ def start_split_data(path_json: str) -> None:
     data_list = read_json(path_json)
     split_data(data_list)
 
+start_split_data("sourse/response_1633859991949.json")
