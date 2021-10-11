@@ -140,3 +140,4 @@ cython_debug/
 .idea/
 sourse/
 data_result/
+aave_for_365_days/
