@@ -5,14 +5,14 @@ import os
 import shutil
 
 
-def get_data_and_write_to_file() -> str:
+def get_data_and_write_to_file() -> dict:
     monet = "aave"
     days = 365
     namedir = monet + "_for_" + str(days) + "_days"
     filename = monet + "_OHLC_" + str(days) + ".json"
     filewithpath = namedir + "/" + filename
-    urlRequest = "https://api.coingecko.com/api/v3/coins/"+monet+"/ohlc?vs_currency=usd&days="+ str(days)
-    raw_data = requests.get(urlRequest).text
+    urlRequest = "https://api.coingecko.com/api/v3/coins/"+monet+"/ohlc?vs_currency=usd&days=" + str(days)
+    raw_data_list = requests.get(urlRequest).json()
 
     try:
         os.remove(filewithpath)
@@ -25,18 +25,15 @@ def get_data_and_write_to_file() -> str:
 
     os.mkdir(namedir)
     with open(filewithpath, "w") as fi:
-        fi.write(raw_data)
+        json.dump(raw_data_list, fi, indent=4)
 
-    return filewithpath
+    return {
+        "file_path": filewithpath,
+        "raw_data_list": raw_data_list
+    }
 
 
-def start_get_data() -> str:
+def start_get_data() -> dict:
     """Start get data by link and return current path on file with raw data"""
 
-    print("Start get data.")
-
-    result_path = get_data_and_write_to_file()
-
-    print(f"Raw data extracted and wrote by path '{result_path}'.")
-
-    return result_path
+    return get_data_and_write_to_file()

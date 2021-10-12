@@ -139,5 +139,7 @@ cython_debug/
 
 .idea/
 sourse/
-data_result/
+result_split_data/
 aave_for_365_days/
+coin_folder/
+.DS_Store
