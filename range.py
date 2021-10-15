@@ -34,12 +34,18 @@ def super_range(*args):
         start = args[0]
         end = args[1]
         step = args[2]
-        while start < end:
-            start += step
-            yield start - step
+        if step > 0:
+            while start < end:
+                start += step
+                yield start - step
+        elif step < 0:
+            while start > end:
+                step = abs(step)
+                start -= step
+                yield start + step
 
 
 if __name__ == "__main__":
 
-    for item in super_range(1, 100, 5):
+    for item in super_range(100, 0, -2):
         print(item)
