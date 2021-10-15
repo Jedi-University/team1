@@ -17,20 +17,20 @@ def super_range(*args):
         if not isinstance(arg, int):
             return print("Введите число")
 
-    count_args = len(args)
+    quantity_args = len(args)
 
-    if count_args == 1:
+    if quantity_args == 1:
         start = 0
         while start < args[0]:
             start += 1
             yield start - 1
-    elif count_args == 2:
+    elif quantity_args == 2:
         start = args[0]
         end = args[1]
         while start < end:
             start += 1
             yield start - 1
-    elif count_args == 3:
+    elif quantity_args == 3:
         start = args[0]
         end = args[1]
         step = args[2]
