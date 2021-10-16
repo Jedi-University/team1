@@ -16,6 +16,8 @@ l = [[1,2,3,4,5,6], [0,0,0,0], [""a"", ""b"", ""c""]]
 "
 """
 
+from functools import reduce
+
 
 # Task № 1
 def func(*args: str):
@@ -25,19 +27,19 @@ def func(*args: str):
 
 
 # Task № 2
-def func_spread():
-    lists = [[1, 2, 3, 4, 5, 6], [0, 0, 0, 0], ["a", "b", "c"]]
-    print(lists)
-    print(id(lists))
+def func_spread(lists):
+    return reduce(lambda el_prev, el: el_prev + el, lists)
 
-    def inner_func():
-        length_list = len(lists)
-        for inx in range(length_list):
-            lists.extend(lists[inx])
-        del lists[:length_list]
-        print(lists)
-        print(id(lists))
-    return inner_func
+
+# Task 3
+def a(x, y):
+    print(f"{x} - {y}")
+
+
+def caller(func, x, j):
+    def inner(c, e):
+        func(x+c, j+e)
+    return inner
 
 
 if __name__ == "__main__":
@@ -46,5 +48,9 @@ if __name__ == "__main__":
     print(f("x"))
 
     # Run second task
-    list_spread = func_spread()
-    list_spread()
+    lists = [[1, 2, 3, 4, 5, 6], [0, 0, 0, 0], ["a", "b", "c"]]
+    print(func_spread(lists))
+
+    # Run third task
+    f = caller(a, "100", "200")
+    f("h", "z")
