@@ -26,7 +26,10 @@ print(reduce(lambda x,y:x+y,l))
 
 def a(x,y):
     print(f"{x} - {y}")
-    
-f = lambda x,y:a('100'+x,'200'+y)
+
+def caller(f,k1,k2):
+    return(lambda x,y:f(k1+x,k2+y))
+           
+f=caller(a,'100','200')
 f("h", "z")
 
