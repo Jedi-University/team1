@@ -2,3 +2,7 @@
 __pycache__/
 venv/
 env/
+*.sqlite
+data.json
+app.log
+.env

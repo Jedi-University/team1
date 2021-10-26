@@ -1,0 +1,3 @@
+sqlalchemy
+beautifultable
+python-decouple
