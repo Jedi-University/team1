@@ -20,6 +20,8 @@ import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from decouple import config
+from threading import Thread
+from queue import Queue
 
 
 logging.basicConfig(level=logging.DEBUG, filename='app.log', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -27,7 +29,6 @@ logging.basicConfig(level=logging.DEBUG, filename='app.log', format='%(asctime)s
 
 FILE_DB_NAME = "top_repos.sqlite"
 DB_PATH = f"sqlite:///{FILE_DB_NAME}"
-QUANTITY_ORGS = 200
 GITHUB_TOKEN = config("github_token", default="")
 
 headers = {
@@ -55,14 +56,16 @@ def connect_db():
     return session()
 
 
-def fetch(quantity_orgs=0):
-    if quantity_orgs == 0:
-        logging.error("Not quantity organizations.")
-        exit()
+def get_data_github_api(url):
+    return requests.get(url, headers=headers).json()
 
+
+def fetch():
+    quantity_orgs = 200
     start_org_id = 1
     max_orgs_on_page = 100
     quantity_iter = 0
+    queue = Queue()  # Create queue
 
     quantity_iter += quantity_orgs // max_orgs_on_page
     leftover_page = quantity_orgs % max_orgs_on_page
@@ -72,34 +75,48 @@ def fetch(quantity_orgs=0):
     logging.info("Start get info about organisations.")
     list_orgs = []
     for _ in range(quantity_iter):
-        github_api_orgs = f"https://api.github.com/organizations?since={start_org_id}&per_page={max_orgs_on_page}"
-        batch_orgs = requests.get(github_api_orgs, headers=headers).json()
+        url_orgs = f"https://api.github.com/organizations?since={start_org_id}&per_page={max_orgs_on_page}"
+        batch_orgs = get_data_github_api(url_orgs)
         list_orgs.extend(batch_orgs)
         if list_orgs:
             start_org_id = list_orgs[-1]["id"]
-
     list_orgs = list_orgs[:quantity_orgs]
     logging.info("Organizations list got.")
 
     logging.info("Start get info about repo each organization.")
-    list_repos = []
+    threads_repo = []
     for orgs in list_orgs:
-        orgs_list_repo = requests.get(orgs["repos_url"], headers=headers).json()
-        list_repos.extend(orgs_list_repo)
+        url_repo = orgs["repos_url"]
+        thread = Thread(target=lambda que, url: que.put(get_data_github_api(url)), args=(queue, url_repo))
+        thread.start()
+        threads_repo.append(thread)
+
+    for thread in threads_repo:  # Wait complete to get all repos
+        thread.join()
+
+    list_repos = []
+    while not queue.empty():  # Get all result and write to list
+        result_repo = queue.get()
+        list_repos.extend(sorted(result_repo, key=lambda repo: repo["stargazers_count"], reverse=True)[:20])
+    logging.info("Repo list got.")
 
     logging.info("Write this repo list in the json file.")
     with open(f"data.json", "w", encoding='utf-8') as file_json:
         json.dump(list_repos, file_json, indent=4)
+    logging.info("Wrote this repo list in the json file.")
 
-    sort_objects_list = sorted(list_repos, key=lambda repo: repo["stargazers_count"], reverse=True)
-    twenty_repos_max_stars = sort_objects_list[:20]
-    logging.info("Repo list got.")
+    logging.info("Start sorted list with repo.")
+    twenty_repos_max_stars = sorted(list_repos, key=lambda repo: repo["stargazers_count"], reverse=True)[:20]
+    logging.info("End sorted list with repo.")
 
     logging.info("Start write data in the db.")
     if os.path.exists(FILE_DB_NAME):
         os.remove(FILE_DB_NAME)
+        logging.info("Old file db remove.")
 
+    logging.info("Connect to db.")
     session = connect_db()
+    logging.info("Connect successfully passed.")
 
     list_add_db = []
     for repo in twenty_repos_max_stars:
@@ -116,7 +133,6 @@ def fetch(quantity_orgs=0):
 
 
 def show():
-    logging.info("Show top repo stars.")
     session = connect_db()
     top_repos = session.query(Top).all()
 
@@ -139,8 +155,12 @@ if __name__ == "__main__":
         logging.critical("No access to api.")
         exit()
     else:
-        fetch(QUANTITY_ORGS)
+        logging.info("Start fetch.")
+        fetch()
+        logging.info("End fetch.")
 
+    logging.info("Start show data.")
     show()
+    logging.info("End show data.")
 
     logging.info("App successfully passed.")

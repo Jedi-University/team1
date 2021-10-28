@@ -5,7 +5,17 @@ import time
 import requests
 
 
-def timing(quatity_iter=1):
+def timing(func):
+    def inner(*args, **kwargs):
+        print("Start timing.")
+        start_time = time.time()
+        func(*args, **kwargs)
+        print("Stop timing.")
+        print(f"Time ran the function {func}: {round(time.time() - start_time, 2)} sec.")
+    return inner
+
+
+def timing_with_param(quatity_iter=1):
     def wrapper(func):
         def inner_func(*args, **kwargs):
             print("Начало замера времени.")
@@ -19,12 +29,12 @@ def timing(quatity_iter=1):
     return wrapper
 
 
-@timing(5)
+@timing_with_param(5)
 def main(*args, **kwargs):
     print(args, kwargs)
 
 
-@timing(2)
+@timing_with_param(2)
 def req_api(url):
     answer = requests.get(url)
     print(answer.status_code)
