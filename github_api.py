@@ -22,6 +22,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from decouple import config
 from threading import Thread
 from queue import Queue
+import time
 
 
 logging.basicConfig(level=logging.DEBUG, filename='app.log', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -155,12 +156,14 @@ if __name__ == "__main__":
         logging.critical("No access to api.")
         exit()
     else:
+        start_time = time.time()
+
         logging.info("Start fetch.")
         fetch()
         logging.info("End fetch.")
 
-    logging.info("Start show data.")
-    show()
-    logging.info("End show data.")
+        logging.info("Start show data.")
+        show()
+        logging.info("End show data.")
 
-    logging.info("App successfully passed.")
+        logging.info(f"App successfully passed. Time ran: {round(time.time() - start_time, 2)} sec.")
