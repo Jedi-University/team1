@@ -1,3 +1,5 @@
+# Python 3.9 version
+
 """
 Используя GitHub API для организаций (https://docs.github.com/en/rest/reference/orgs)
 для первых 200 организаций нужно подсчитать ТОП-20 самых "звездных"
