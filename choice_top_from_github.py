@@ -8,21 +8,17 @@
 #2 команда: show достает из базы ТОП и выводит на экран. 
 #В качестве базы нужно использовать sqllite.
 #
-#import requests
-#import json
-#import time
-#import sqlite3
-import top_repo_github
-from my_config import myauth
+from  top_repo_github import connection_db_and_table, get_org,fetching,select_and_delete
 
-
+# задаем имя бызы данных sqlite
+my_home_db='sqlite:///homework.db'    
 # задаем количество организаций, по которым будем проводить выбор ТОП репозиториев
 get_quantity_org=10
 #задаем значение ТОП
 quantity_top=20
-# выбираем заданное количество организаций из GitHub
-list_org=top_repo_github.get_org(get_quantity_org)
-# выбираем репозитории заданного количества организаций из GitHub, получаем из них ТОП-quantity_top, записываем все в базу данных
-top_repo_github.fetch(list_org,quantity_top)
-#выводим на экран из базы данных
-top_repo_github.show(quantity_top)
+#fetch
+# выбираем репозитории заданного количества организаций из GitHub,
+# получаем из них ТОП-quantity_top, записываем все в базу данных
+connection_db_and_table(my_home_db,get_quantity_org,quantity_top,fetching)
+#show (выводим на экран из базы данных)
+connection_db_and_table(my_home_db,get_quantity_org,quantity_top,show)
