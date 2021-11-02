@@ -13,11 +13,11 @@ from  top_repo_github import connection_db_and_table, get_org,fetching,show
 my_home_db='sqlite:///homework.db'    
 # задаем количество организаций, по которым будем проводить выбор ТОП репозиториев
 get_quantity_org=10
-#задаем значение ТОП
+# задаем значение ТОП
 quantity_top=20
-#fetch
+# fetch
 # выбираем репозитории заданного количества организаций из GitHub,
 # получаем из них ТОП-quantity_top, записываем все в базу данных
-connection_db_and_table(my_home_db,get_quantity_org,quantity_top,fetching)
-#show (выводим на экран из базы данных)
-connection_db_and_table(my_home_db,get_quantity_org,quantity_top,show)
+connection_db_and_table(my_home_db, get_quantity_org, quantity_top, fetching)
+# show (выводим на экран из базы данных)
+connection_db_and_table(my_home_db, get_quantity_org, quantity_top, show)
