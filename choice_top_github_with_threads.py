@@ -8,7 +8,7 @@
 #2 команда: show достает из базы ТОП и выводит на экран. 
 #В качестве базы нужно использовать sqllite.
 #
-from  top_repo_github import connection_db_and_table, get_org,fetching,show
+from  top_repo_github_threads import connection_db_and_table, get_org,fetching,show
 
 # задаем имя бызы данных sqlite
 my_home_db='sqlite:///homework.db'    

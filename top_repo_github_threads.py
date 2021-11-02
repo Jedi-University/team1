@@ -1,4 +1,4 @@
-﻿""" This is the homework 7 modul.
+﻿""" This is the homework 7 modul with 2 threads.
 
 """
 __version__ = '0.1'
