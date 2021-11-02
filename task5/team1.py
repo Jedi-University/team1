@@ -1,14 +1,10 @@
 from random import randint
 
 class Human:
-	name = None
-	age = None
-	sex = None
-
-	#def __init__(self, *args):
-	#	self.name = args[0]
-	#	self.age = args[1]
-	#	self.sex = args[2]
+	def __init__(self, name, age, sex):
+		self.name = name
+		self.age = age
+		self.sex = sex
 
 	def think(self):
 		return randint(0, 100)
@@ -17,31 +13,19 @@ class Human:
 		return t + 10
 
 class Student(Human):
-	group = None
-	speciality = None
-
-	def __init__(self, *args):
-		self.name = args[0]
-		self.age = args[1]
-		self.sex = args[2]
-		#super().__init__(args[:2])
-		self.group = args[3]
-		self.speciality = args[4]
+	def __init__(self, name, age, sex, group, speciality):
+		super().__init__(name, age, sex)
+		self.group = group
+		self.speciality = speciality
 	
 	def sum(self, a, b):
 		return a + b
 
 class Teacher(Human):
-	subject = None
-	experience = None
-
-	def __init__(self, *args):
-		self.name = args[0]
-		self.age = args[1]
-		self.sex = args[2]
-		#super().__init__(args[:2])
-		self.subject = args[3]
-		self.experience = args[4]
+	def __init__(self, name, age, sex, subject, experience):
+		super().__init__(name, age, sex)
+		self.subject = subject
+		self.experience = experience
 
 	def speak(self, t):
 		return super().speak(t) + self.experience
