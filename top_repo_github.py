@@ -1,35 +1,24 @@
-п»ї""" This is the homework 7 modul.
+#Используя GitHub API для организаций (https://docs.github.com/en/rest/reference/orgs) 
+#для первых N организаций нужно подсчитать ТОП-M самых "звездных" репозиториев
+#(т.е. те репозитории у которых больше всего звездочек среди всех организаций). 
+#Полученный ТОП  сохранить в базу используя SQLAlchemy в следующем формате Top(id, org_name, repo_name, stars_count). 
+#В приложение должно быть 2 команды 1 команда: fetch, которая забирает данные с github, находит ТОП и сохраняет его в базу; 
+#2 команда: show достает из базы ТОП и выводит на экран. 
+#В качестве базы  используется sqllite.
 
-"""
-__version__ = '0.1'
-__author__ = 'Popova Irene'
-
+from my_config import myauth
 import requests
 import json
 import time
-from sqlalchemy import create_engine, MetaData, Table, Column,Text, Integer,ARRAY
-from sqlalchemy import insert, select, delete
-import threading
+#import sqlalchemy
+from sqlalchemy import create_engine, insert, select, MetaData, Table, Column,Text, Integer,ARRAY
+from sqlalchemy import delete
 
-from my_config import myauth
-
-
-# РѕРіСЂР°РЅРёС‡РµРЅРёСЏ РїРѕ РєРѕР»РёС‡РµСЃС‚РІСѓ РІС‹РґР°РІР°РµРјС‹С… РїРѕ Р·Р°РїСЂРѕСЃР°Рј РѕСЂРіР°РЅРёР·Р°С†РёР№ Рё СЂРµРїРѕР·РёС‚РѕСЂРёРµРІ
+# ограничения по количеству выдаваемых по запросам организаций и репозиториев
 rep_limit=100
 
-class myThread (threading.Thread):
-    def __init__(self, name, counter,list_org,count_top):
-        threading.Thread.__init__(self)
-        self.threadID = counter
-        self.name = name
-        self.counter = counter
-        self.list_org = list_org
-        self.count_top = count_top
-    def run(self):
-        choicing_repo(self.list_org,self.count_top)
-
 def waiting_n_minut(func):
-    #Р”РћР‘РРўР¬!!!!!!!!!!!!!!
+    #ДОБИТЬ!!!!!!!!!!!!!!
     def wrapper(*args,**kwargs):
         answer=func(*args)
         if answer.status_code==403:
@@ -49,11 +38,10 @@ def getAPIresult(url):
       APIanswer = requests.get(url,auth=myauth)
       return APIanswer
 
-
 def get_org(quantity_org):
-    ''' РІС‹Р±РёСЂР°РµС‚ Рѕquantity_org Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹С… РѕСЂРіР°РЅРёР·Р°С†РёР№ РІ GitHub
-        Рё РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РёР· РёС… РЅР°Р·РІР°РЅРёР№'''
-    # РѕРіСЂР°РЅРёС‡РµРЅРёСЏ РїРѕ РєРѕР»РёС‡РµСЃС‚РІСѓ РІС‹РґР°РІР°РµРјС‹С… РїРѕ Р·Р°РїСЂРѕСЃР°Рј РѕСЂРіР°РЅРёР·Р°С†РёР№
+    ''' выбирает оquantity_org зарегистрированных организаций в GitHub
+        и возвращает список из их названий'''
+    # ограничения по количеству выдаваемых по запросам организаций
     org_limit=100
     if quantity_org<org_limit:
         org_limit=quantity_org
@@ -68,7 +56,7 @@ def get_org(quantity_org):
         result=file_result.json()
         list_org.extend([j['login'] for j in result])
         quantity_proc+=len(result)
-        print(f'Р’С‹Р±СЂР°РЅРѕ {quantity_proc} РѕСЂРіР°РЅРёР·Р°С†РёР№')
+        print(f'Выбрано {quantity_proc} организаций')
     return list_org
 
 
@@ -86,62 +74,33 @@ def connection_db_and_table(name_database,q_org,q_top,func):
                  )
     func(my_conn,name_table,q_org,q_top)
 
-def choicing_repo(list_org,count_top):
-# РїРѕ СЃРїРёСЃРєСѓ РѕСЂРіР°РЅРёР·Р°С†РёР№ list_org РІС‹Р±РёСЂР°РµРј Рё РІРѕР·РІСЂР°С‰Р°РµРј РёРЅС„Рѕ Рѕ count_top СЂРµРїРѕР·РёС‚РѕСЂРёСЏС… list_repo
-#    list_repo=[]
-    for i in list_org:
-        print(f"РћР±СЂР°Р±Р°С‚С‹РІР°СЋ {i}")
+def fetching(my_conn,name_table,q_org,count_top):
+#fetch вызывается из connection_db_and_table, 4-й аргумент
+    org_N=get_org(q_org)
+    l=[]
+    for i in org_N:
+        print(f"Обрабатываю {i}")
         file_result=getAPIresult('https://api.github.com/orgs/'+i+'/repos').json()
         for j in file_result:
             if j['stargazers_count']>0:
-                dop=[j['stargazers_count'], j['id'],
-                     j['owner']['login'], j['name']
-                    ]
+                dop=[j['stargazers_count'], j['id'], j['owner']['login'], j['name']]
                 print(dop)
-                list_repo.append(dop)
-    list_repo.sort(reverse=True)      
-    return list_repo[:count_top]
-
-def fetching(my_conn,name_table,q_org,count_top):
-#fetch РІС‹Р·С‹РІР°РµС‚СЃСЏ РёР· connection_db_and_table, 4-Р№ Р°СЂРіСѓРјРµРЅС‚
-    global list_repo
-    list_repo=[]
-    list_all_org = get_org(q_org)
-    # СЃРѕР·РґР°РµРј Рё Р·Р°РїСѓСЃРєР°РµРј РґРІР° С‚СЂРµРґР° ( РїРѕРєР° С‚СѓРїРѕ 2, РїРѕС‚РѕРј РІРєР»СЋС‡Сѓ РёРЅС‚РµР»Р»РµРєС‚)
-    count_thread=2
-    ex_thread=list(i for i in range(count_thread)) 
-    start_position = 0
-    delta=len(list_all_org) // count_thread
-    middle_position=delta
-    for i in range(count_thread):
-        ex_thread[i] = myThread("Thread", i+1, list_all_org[start_position:middle_position], count_top)
-        ex_thread[i].start()
-        start_position = middle_position 
-        middle_position += delta if i < len(list_all_org) else len(list_all_org)
-    for i in range(count_thread):
-        ex_thread[i].join()
-        
-    list_repo.sort(reverse = True)
-    # Р·Р°РїРёСЃС‹РІР°РµРј СЂРµР·СѓР»СЊС‚Р°С‚С‹ РІ Р±Р°Р·Сѓ РґР°РЅРЅС‹С…
+                l.append(dop)
+    l.sort(reverse=True)
     counter=0 
-    for i in list_repo[:count_top]:
+    for i in l[:count_top]:
         counter+=1
         j=[counter]+i
-        print(f"Р—Р°РїРёСЃС‹РІР°СЋ {j}")
-        a=[{"topid": j[0],
-            "id": j[2],
-            "org_name": j[3],
-            "repo_name": j[4],
-            "stars_count": j[1]}
-          ]
+        print(f"Записываю {j}")
+        a=[{"topid": j[0],"id": j[2],"org_name": j[3],"repo_name": j[4],"stars_count": j[1]}]
         ins=insert(name_table)
         r=my_conn.execute(ins,a)
 
 def show(my_conn,name_table,q_org,count_top):
-#show РІС‹Р·С‹РІР°РµС‚СЃСЏ РёР· connection_db_and_table, 4-Р№ Р°СЂРіСѓРјРµРЅС‚
+#show вызывается из connection_db_and_table, 4-й аргумент
     s=name_table.select()
     r=my_conn.execute(s)
-    print(f'TOP-{count_top} СЃР°РјС‹С… РїРѕРїСѓР»СЏСЂРЅС‹С… СЂРµРїРѕР·РёС‚РѕСЂРёРµРІ {q_org} РѕСЂРіР°РЅРёР·Р°С†РёР№:')
+    print(f'TOP-{count_top} самых популярных репозиториев {q_org} организаций:')
     for i in r.fetchall():
         print(i)
     s=delete(name_table).where(name_table.c.topid > 0)
@@ -149,4 +108,3 @@ def show(my_conn,name_table,q_org,count_top):
 
 
                                                                                   
-
