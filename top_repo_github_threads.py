@@ -7,6 +7,7 @@ __author__ = 'Popova Irene'
 import requests
 import json
 import time
+import os
 from sqlalchemy import create_engine, MetaData, Table, Column,Text, Integer,ARRAY
 from sqlalchemy import insert, select, delete
 import threading
@@ -107,8 +108,8 @@ def fetching(my_conn,name_table,q_org,count_top):
     global list_repo
     list_repo=[]
     list_all_org = get_org(q_org)
-    # создаем и запускаем два треда ( пока тупо 2, потом включу интеллект)
-    count_thread=2
+    # создаем и запускаем треды
+    count_thread=os.cpu_count()*2
     ex_thread=list(i for i in range(count_thread)) 
     start_position = 0
     delta=len(list_all_org) // count_thread
