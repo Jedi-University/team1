@@ -4,5 +4,5 @@ venv/
 env/
 *.sqlite
 data.json
-app.log
+*.log
 .env
