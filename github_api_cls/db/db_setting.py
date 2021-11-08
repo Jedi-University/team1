@@ -3,9 +3,8 @@ import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from beautifultable import BeautifulTable
-import os
 import logging
-from github_api_cls.consts import DB_PATH, FILE_DB_NAME
+from github_api_cls.consts import DB_PATH
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -40,13 +39,14 @@ class DB:
         return session()
 
     def write_db(self, twenty_repos_max_stars):
+        self.remove_db()
         logging.info("Start write to the database.")
         list_add_db = []
         for repo in twenty_repos_max_stars:
             top_item = Top(
                 org_name=repo["owner"]["login"],
                 repo_name=repo["name"],
-                stars_count=repo["stargazers_count"]
+                stars_count=int(repo["stargazers_count"])
             )
             list_add_db.append(top_item)
         self.session.add_all(list_add_db)
@@ -69,10 +69,8 @@ class DB:
         print(table)
         logging.info(table)
 
-    @staticmethod
-    def remove_db():
-        """Remove database"""
-        logging.info("Check the old database")
-        if os.path.exists(FILE_DB_NAME):
-            os.remove(FILE_DB_NAME)
-            logging.info("Old file db remove.")
+    def remove_db(self):
+        """Remove table"""
+        logging.info("Remove all row in table top")
+        self.session.query(Top).delete()
+

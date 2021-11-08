@@ -3,7 +3,7 @@ from decouple import config
 
 
 FILE_DB_NAME = "top_repos.sqlite"
-DB_PATH = f"sqlite:///{FILE_DB_NAME}"
+DB_PATH = f"sqlite:///db/{FILE_DB_NAME}"
 GITHUB_TOKEN = config("github_token", default="")
 HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}",
