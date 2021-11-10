@@ -1,95 +1,34 @@
 
-import logging
-import os
-from github_api_cls.workers.worker import WorkerRepos
 from github_api_cls.db.db_setting import DB
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
-
-logging.basicConfig(level=logging.DEBUG,
-                    filename='app.log',
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+import logging
+logger = logging.getLogger(__name__)
 
 
 class Orchestrator:
 
-    def __init__(self, mode="simple", list_orgs=None):
-        self.mode = mode
-        self.list_orgs = list_orgs
-        self.list_repos = []
-        self.twenty_repos_max_stars = None
-        self.cpu_count = os.cpu_count()
+    @staticmethod
+    def start_worker(worker):
+        logger.info(f"Start worker {worker}")
+        return worker.start_process()
 
-        if mode == "simple":
-            self.start_simple()
-        elif mode == "thread":
-            self.start_thread()
-        elif mode == "process":
-            self.start_process()
-        elif mode == "async":
-            pass
+    @staticmethod
+    def get_top_twenty_repos(tmp_list_repo: list) -> list:
+        logger.info(f"Get top twenty repos max stars")
+        return sorted(tmp_list_repo,
+                      key=lambda repo: repo["stargazers_count"],
+                      reverse=True)[:20]
 
-        self.get_twenty_repos_max_stars()
-        self.write_data_to_db()
-        self.show_all_data()
-
-    def start_simple(self):
-        """Start executor without parallal processing data"""
-        for orgs in self.list_orgs:
-            worker = WorkerRepos(orgs)
-            self.list_repos.extend(worker.list_repos)
-        logging.info("Simple completed")
-
-    def start_thread(self):
-        """Start executor with thread parallal processing data"""
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            future_repos = {executor.submit(WorkerRepos, orgs): orgs for orgs in self.list_orgs}
-            for future in as_completed(future_repos):
-                orgs_login = future_repos[future]["login"]
-                try:
-                    data = future.result()
-                    self.list_repos.extend(data.list_repos)
-                except Exception as exc:
-                    logging.critical('{} generated an exception: {}'.format(orgs_login, exc))
-                else:
-                    logging.info('{} page'.format(orgs_login))
-        logging.info("Thread completed")
-
-    def start_process(self):
-        """Start executor with process parallal processing data"""
-        with ProcessPoolExecutor(max_workers=self.cpu_count) as executor:
-            future_repos = {executor.submit(WorkerRepos, orgs): orgs for orgs in self.list_orgs}
-            for future in as_completed(future_repos):
-                orgs_login = future_repos[future]["login"]
-                try:
-                    data = future.result()
-                    self.list_repos.extend(data.list_repos)
-                except Exception as exc:
-                    logging.critical('{} generated an exception: {}'.format(orgs_login, exc))
-                else:
-                    logging.info('{} page'.format(orgs_login))
-        logging.info("Process completed")
-
-    # def async_process(self):
-    #     """Start executor with async await processing data"""
-    #     for orgs in self.list_orgs:
-    #         worker = WorkerRepos(orgs, mode_request="async")
-    #         self.list_repos.extend(worker.list_repos)
-    #     logging.info("Async completed")
-
-    def write_data_to_db(self):
-        if self.twenty_repos_max_stars:
+    @staticmethod
+    def write_data_to_db(top_twenty_repos):
+        if top_twenty_repos:
             session = DB()
-            session.write_db(self.twenty_repos_max_stars)
+            session.write_db(top_twenty_repos)
         else:
-            logging.info("self.twenty_repos_max_stars is empty")
+            logger.info("top_twenty_repos is empty")
 
-    def show_all_data(self):
+    @staticmethod
+    def show_all_data():
         session = DB()
         session.show_all()
 
-    def get_twenty_repos_max_stars(self):
-        self.twenty_repos_max_stars = sorted(self.list_repos,
-                                             key=lambda repo: repo["stargazers_count"],
-                                             reverse=True)[:20]
-        logging.info("Twenty repos by max start completed")

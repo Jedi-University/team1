@@ -27,7 +27,9 @@ from queue import Queue
 import time
 
 
-logging.basicConfig(level=logging.DEBUG, filename='app.log', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG,
+                    filename='app.log',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 FILE_DB_NAME = "top_repos.sqlite"

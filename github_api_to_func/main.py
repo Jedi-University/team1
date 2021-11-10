@@ -20,10 +20,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from decouple import config
 
 
-logging.basicConfig(level=logging.DEBUG, filename='github_api/app.log', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, filename='github_api_to_func/app.log', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
-FILE_DB_NAME = "github_api/top_repos.sqlite"
+FILE_DB_NAME = "github_api_to_func/top_repos.sqlite"
 DB_PATH = f"sqlite:///{FILE_DB_NAME}"
 QUANTITY_ORGS = 200
 GITHUB_TOKEN = config("github_token", default="")
