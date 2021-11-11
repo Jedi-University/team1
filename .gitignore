@@ -5,4 +5,5 @@ env/
 *.sqlite
 data.json
 *.log
+!github_api.log
 .env
