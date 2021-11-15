@@ -1,7 +1,7 @@
 from typing import List
 import logging
 
-from github_api_cls.workers.worker import Worker
+from workers.worker import Worker
 
 logger = logging.getLogger(__name__)
 

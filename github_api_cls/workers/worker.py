@@ -3,7 +3,7 @@ import requests
 import os
 from typing import Any
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
-from github_api_cls.db.db_setting import DB
+from db.db_setting import DB
 import asyncio
 import aiohttp
 
@@ -214,10 +214,12 @@ class WorkerAsyncRepos(WorkerRepos):
                                        key=lambda repo: repo["stargazers_count"],
                                        reverse=True)[:20])
         self.list_repos.extend(tmp_list)
+        orgs_name = orgs["login"]
+        logger.info(f"Organization '{orgs_name}' ------> completed")
 
     @staticmethod
     async def async_get_data_by_url(session, url) -> Any:
-        async with session.get(url) as response:
+        async with session.get(url, headers=HEADERS) as response:
             if response.status == 200:
                 return await response.json()
             elif response.status == 403:

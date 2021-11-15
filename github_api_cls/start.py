@@ -1,8 +1,10 @@
-from github_api_cls.db.db_setting import DB
+from db.db_setting import DB
 from workers.worker import WorkerOrgs, WorkerReposSimple, WorkerWriteDataToDB, \
     WorkerReposThread, WorkerReposProcess, WorkerGetTop, WorkerAsyncRepos
 from orchestrators.orch_main import Orchestrator
 import time
+import argparse
+import sys
 
 import logging
 logging.basicConfig(level=logging.DEBUG, filename='logger/github_api.log',
@@ -11,12 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 class Main:
-    def __init__(self, quantity_orgs: int = 0):
-        self.quantity_orgs = quantity_orgs
+    def __init__(self, args):
+        self.quantity_orgs = args.orgs
         self.start_time = None
         self.end_time = None
         self.orchestrator = Orchestrator()
         self.top_twenty_repos = []
+        self.start_app(args.mode)
 
     def start_app(self, mode):
         if not isinstance(self.quantity_orgs, int) and self.quantity_orgs <= 0:
@@ -50,20 +53,19 @@ class Main:
 
 
 if __name__ == "__main__":
-    """
-        start_mode:
-            simple - start simple mode without parallal processing data
-            thread - start thread mode with parallal processing data
-            process - start process mode with parallal processing data
-            # (DONT'T WORK - IT IS IN THE JOB) async - start async mode with (async await) processing data
-            
-            QUANTITY_ORGS = 1 quantity organisations which do you want to get
-    """
 
-    QUANTITY_ORGS = 200
+    parser = argparse.ArgumentParser(description="Get data from github API")
+    parser.add_argument("--orgs",
+                        type=int,
+                        required=True,
+                        help="Quantity of organizations which you want to get their repositories")
+    parser.add_argument("--mode",
+                        type=str,
+                        required=True,
+                        help="simple - start simple mode without parallal processing data; "
+                             "thread - start thread mode with parallal processing data; "
+                             "process - start process mode with parallal processing data; "
+                             "async - start async mode with (async await) processing data.")
 
-    main = Main(QUANTITY_ORGS)
-    main.start_app("simple")
-    # main.start_app("thread")
-    # main.start_app("process")
-    # main.start_app("async")
+    args = parser.parse_args(sys.argv[1:])
+    main = Main(args)
