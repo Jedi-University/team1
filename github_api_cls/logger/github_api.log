@@ -3791,3 +3791,147 @@ FROM top
 | 20 |   engineyard   |     engineyard     |     133     |
 +----+----------------+--------------------+-------------+
 2021-11-15 15:44:52,136 __main__ INFO:App with mode 'async' successfully passed. Time ran: 1.9 sec.
+2021-11-15 20:00:03,508 __main__ INFO:Start app with mode 'async'.
+2021-11-15 20:00:03,508 orchestrators.orch_main INFO:Start worker <workers.worker.WorkerOrgs object at 0x7ff2814375e0>
+2021-11-15 20:00:03,508 workers.worker INFO:Start get info about organisations.
+2021-11-15 20:00:03,538 urllib3.connectionpool DEBUG:Starting new HTTPS connection (1): api.github.com:443
+2021-11-15 20:00:03,926 urllib3.connectionpool DEBUG:https://api.github.com:443 "GET /organizations?per_page=20 HTTP/1.1" 200 None
+2021-11-15 20:00:03,930 workers.worker INFO:Organizations list got.
+2021-11-15 20:00:03,930 orchestrators.orch_main INFO:Start worker <workers.worker.WorkerAsyncRepos object at 0x7ff2814376a0>
+2021-11-15 20:00:03,931 workers.worker INFO:Start get info about repo each organization.
+2021-11-15 20:00:03,931 asyncio DEBUG:Using selector: KqueueSelector
+2021-11-15 20:00:04,509 workers.worker INFO:Organization 'errfree' ------> completed
+2021-11-15 20:00:04,511 workers.worker INFO:Organization 'ipvideomarketinfo' ------> completed
+2021-11-15 20:00:04,512 workers.worker INFO:Organization 'ogc' ------> completed
+2021-11-15 20:00:04,512 workers.worker INFO:Organization 'wrenchlabs' ------> completed
+2021-11-15 20:00:04,622 workers.worker INFO:Organization 'wherecloud' ------> completed
+2021-11-15 20:00:04,731 workers.worker INFO:Organization 'merb' ------> completed
+2021-11-15 20:00:04,775 workers.worker INFO:Organization 'entryway' ------> completed
+2021-11-15 20:00:05,128 workers.worker INFO:Organization 'sevenwire' ------> completed
+2021-11-15 20:00:05,281 workers.worker INFO:Organization 'moneyspyder' ------> completed
+2021-11-15 20:00:05,333 workers.worker INFO:Organization 'animikii' ------> completed
+2021-11-15 20:00:05,373 workers.worker INFO:Organization 'collectiveidea' ------> completed
+2021-11-15 20:00:05,604 workers.worker INFO:Organization 'sauspiel' ------> completed
+2021-11-15 20:00:05,618 workers.worker INFO:Organization 'engineyard' ------> completed
+2021-11-15 20:00:05,660 workers.worker INFO:Organization 'revelation' ------> completed
+2021-11-15 20:00:05,671 workers.worker INFO:Organization 'cdr' ------> completed
+2021-11-15 20:00:05,831 workers.worker INFO:Organization 'netguru' ------> completed
+2021-11-15 20:00:06,027 workers.worker INFO:Organization 'railsdog' ------> completed
+2021-11-15 20:00:06,084 workers.worker INFO:Organization 'railslove' ------> completed
+2021-11-15 20:00:06,235 workers.worker INFO:Organization 'ministrycentered' ------> completed
+2021-11-15 20:00:06,308 workers.worker INFO:Organization 'sproutit' ------> completed
+2021-11-15 20:00:06,309 workers.worker INFO:Repo list got.
+2021-11-15 20:00:06,309 orchestrators.orch_main INFO:Start worker <workers.worker.WorkerGetTop object at 0x7ff281437940>
+2021-11-15 20:00:06,309 workers.worker INFO:Get top twenty repos max stars
+2021-11-15 20:00:06,309 orchestrators.orch_main INFO:Start worker <workers.worker.WorkerWriteDataToDB object at 0x7ff2814379a0>
+2021-11-15 20:00:06,309 db.db_setting INFO:Start connect to the database
+2021-11-15 20:00:06,341 sqlalchemy.engine.Engine INFO:BEGIN (implicit)
+2021-11-15 20:00:06,341 sqlalchemy.engine.Engine INFO:PRAGMA main.table_info("top")
+2021-11-15 20:00:06,341 sqlalchemy.engine.Engine INFO:[raw sql] ()
+2021-11-15 20:00:06,346 sqlalchemy.engine.Engine INFO:COMMIT
+2021-11-15 20:00:06,346 db.db_setting INFO:Session create
+2021-11-15 20:00:06,346 db.db_setting INFO:Remove all row in table top
+2021-11-15 20:00:06,348 sqlalchemy.engine.Engine INFO:BEGIN (implicit)
+2021-11-15 20:00:06,349 sqlalchemy.engine.Engine INFO:DELETE FROM top
+2021-11-15 20:00:06,350 sqlalchemy.engine.Engine INFO:[generated in 0.00015s] ()
+2021-11-15 20:00:06,351 db.db_setting INFO:Start write to the database.
+2021-11-15 20:00:06,354 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,354 sqlalchemy.engine.Engine INFO:[generated in 0.00026s] ('cdr', 'code-server', 49802)
+2021-11-15 20:00:06,356 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,356 sqlalchemy.engine.Engine INFO:[cached since 0.001463s ago] ('cdr', 'sshcode', 5830)
+2021-11-15 20:00:06,357 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,357 sqlalchemy.engine.Engine INFO:[cached since 0.002399s ago] ('collectiveidea', 'delayed_job', 4664)
+2021-11-15 20:00:06,357 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,357 sqlalchemy.engine.Engine INFO:[cached since 0.002609s ago] ('collectiveidea', 'audited', 2955)
+2021-11-15 20:00:06,357 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,357 sqlalchemy.engine.Engine INFO:[cached since 0.002819s ago] ('collectiveidea', 'awesome_nested_set', 2254)
+2021-11-15 20:00:06,357 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,357 sqlalchemy.engine.Engine INFO:[cached since 0.00302s ago] ('netguru', 'ResponseDetective', 1921)
+2021-11-15 20:00:06,357 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,357 sqlalchemy.engine.Engine INFO:[cached since 0.003209s ago] ('engineyard', 'ey-cloud-recipes', 1002)
+2021-11-15 20:00:06,358 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,358 sqlalchemy.engine.Engine INFO:[cached since 0.003395s ago] ('sevenwire', 'forgery', 791)
+2021-11-15 20:00:06,358 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,358 sqlalchemy.engine.Engine INFO:[cached since 0.003701s ago] ('cdr', 'sail', 652)
+2021-11-15 20:00:06,358 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,358 sqlalchemy.engine.Engine INFO:[cached since 0.003943s ago] ('sproutit', 'sproutcore', 456)
+2021-11-15 20:00:06,358 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,358 sqlalchemy.engine.Engine INFO:[cached since 0.004161s ago] ('collectiveidea', 'graticule', 300)
+2021-11-15 20:00:06,359 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,359 sqlalchemy.engine.Engine INFO:[cached since 0.004364s ago] ('collectiveidea', 'tinder', 258)
+2021-11-15 20:00:06,359 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,359 sqlalchemy.engine.Engine INFO:[cached since 0.004565s ago] ('engineyard', 'rails_metrics', 257)
+2021-11-15 20:00:06,360 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,360 sqlalchemy.engine.Engine INFO:[cached since 0.005849s ago] ('cdr', 'slog', 230)
+2021-11-15 20:00:06,360 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,360 sqlalchemy.engine.Engine INFO:[cached since 0.006089s ago] ('sproutit', 'sproutcore-samples', 226)
+2021-11-15 20:00:06,360 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,361 sqlalchemy.engine.Engine INFO:[cached since 0.006304s ago] ('collectiveidea', 'acts_as_geocodable', 205)
+2021-11-15 20:00:06,361 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,361 sqlalchemy.engine.Engine INFO:[cached since 0.006518s ago] ('merb', 'merb', 184)
+2021-11-15 20:00:06,361 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,361 sqlalchemy.engine.Engine INFO:[cached since 0.006715s ago] ('netguru', 'ngrvalidator', 170)
+2021-11-15 20:00:06,361 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,361 sqlalchemy.engine.Engine INFO:[cached since 0.006909s ago] ('engineyard', 'vertebra', 161)
+2021-11-15 20:00:06,361 sqlalchemy.engine.Engine INFO:INSERT INTO top (org_name, repo_name, stars_count) VALUES (?, ?, ?)
+2021-11-15 20:00:06,361 sqlalchemy.engine.Engine INFO:[cached since 0.007105s ago] ('engineyard', 'engineyard', 133)
+2021-11-15 20:00:06,362 sqlalchemy.engine.Engine INFO:COMMIT
+2021-11-15 20:00:06,363 db.db_setting INFO:Data about top repo stars successfully wrote.
+2021-11-15 20:00:06,363 db.db_setting INFO:Connect db close
+2021-11-15 20:00:06,363 db.db_setting INFO:Start connect to the database
+2021-11-15 20:00:06,364 sqlalchemy.engine.Engine INFO:BEGIN (implicit)
+2021-11-15 20:00:06,364 sqlalchemy.engine.Engine INFO:PRAGMA main.table_info("top")
+2021-11-15 20:00:06,364 sqlalchemy.engine.Engine INFO:[raw sql] ()
+2021-11-15 20:00:06,364 sqlalchemy.engine.Engine INFO:COMMIT
+2021-11-15 20:00:06,365 db.db_setting INFO:Session create
+2021-11-15 20:00:06,365 db.db_setting INFO:Show top repo stars.
+2021-11-15 20:00:06,365 sqlalchemy.engine.Engine INFO:BEGIN (implicit)
+2021-11-15 20:00:06,367 sqlalchemy.engine.Engine INFO:SELECT top.id AS top_id, top.org_name AS top_org_name, top.repo_name AS top_repo_name, top.stars_count AS top_stars_count 
+FROM top
+2021-11-15 20:00:06,367 sqlalchemy.engine.Engine INFO:[generated in 0.00013s] ()
+2021-11-15 20:00:06,368 db.db_setting INFO:--------> Print results. <-----------
+2021-11-15 20:00:06,368 db.db_setting INFO:All quantity: 20
+2021-11-15 20:00:06,368 db.db_setting INFO:+----+----------------+--------------------+-------------+
+| id |    org_name    |     repo_name      | stars_count |
++----+----------------+--------------------+-------------+
+| 1  |      cdr       |    code-server     |    49802    |
++----+----------------+--------------------+-------------+
+| 2  |      cdr       |      sshcode       |    5830     |
++----+----------------+--------------------+-------------+
+| 3  | collectiveidea |    delayed_job     |    4664     |
++----+----------------+--------------------+-------------+
+| 4  | collectiveidea |      audited       |    2955     |
++----+----------------+--------------------+-------------+
+| 5  | collectiveidea | awesome_nested_set |    2254     |
++----+----------------+--------------------+-------------+
+| 6  |    netguru     | ResponseDetective  |    1921     |
++----+----------------+--------------------+-------------+
+| 7  |   engineyard   |  ey-cloud-recipes  |    1002     |
++----+----------------+--------------------+-------------+
+| 8  |   sevenwire    |      forgery       |     791     |
++----+----------------+--------------------+-------------+
+| 9  |      cdr       |        sail        |     652     |
++----+----------------+--------------------+-------------+
+| 10 |    sproutit    |     sproutcore     |     456     |
++----+----------------+--------------------+-------------+
+| 11 | collectiveidea |     graticule      |     300     |
++----+----------------+--------------------+-------------+
+| 12 | collectiveidea |       tinder       |     258     |
++----+----------------+--------------------+-------------+
+| 13 |   engineyard   |   rails_metrics    |     257     |
++----+----------------+--------------------+-------------+
+| 14 |      cdr       |        slog        |     230     |
++----+----------------+--------------------+-------------+
+| 15 |    sproutit    | sproutcore-samples |     226     |
++----+----------------+--------------------+-------------+
+| 16 | collectiveidea | acts_as_geocodable |     205     |
++----+----------------+--------------------+-------------+
+| 17 |      merb      |        merb        |     184     |
++----+----------------+--------------------+-------------+
+| 18 |    netguru     |    ngrvalidator    |     170     |
++----+----------------+--------------------+-------------+
+| 19 |   engineyard   |      vertebra      |     161     |
++----+----------------+--------------------+-------------+
+| 20 |   engineyard   |     engineyard     |     133     |
++----+----------------+--------------------+-------------+
+2021-11-15 20:00:06,377 __main__ INFO:App with mode 'async' successfully passed. Time ran: 2.87 sec.

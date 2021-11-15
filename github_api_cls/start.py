@@ -13,15 +13,16 @@ logger = logging.getLogger(__name__)
 
 
 class Main:
-    def __init__(self, args):
-        self.quantity_orgs = args.orgs
+    """Start application which get data by github API"""
+
+    def __init__(self, quantity_orgs):
+        self.quantity_orgs = quantity_orgs
         self.start_time = None
         self.end_time = None
         self.orchestrator = Orchestrator()
         self.top_twenty_repos = []
-        self.start_app(args.mode)
 
-    def start_app(self, mode):
+    def start_app(self, mode) -> None:
         if not isinstance(self.quantity_orgs, int) and self.quantity_orgs <= 0:
             logger.warning("Not correctly formatted paramert quantity orgs")
             exit()
@@ -68,4 +69,5 @@ if __name__ == "__main__":
                              "async - start async mode with (async await) processing data.")
 
     args = parser.parse_args(sys.argv[1:])
-    main = Main(args)
+    main = Main(args.orgs)
+    main.start_app(args.mode)
