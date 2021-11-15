@@ -1,7 +1,11 @@
 
 import requests
 import os
+from typing import Any
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
+from github_api_cls.db.db_setting import DB
+import asyncio
+import aiohttp
 
 from decouple import config
 
@@ -20,22 +24,47 @@ HEADERS = {
 class Worker:
     """Abstract base class for workers"""
 
-    def start_process(self):
-        return self.get_list()
-
-    def get_list(self):
+    def run(self, *args, **kwargs) -> Any:
         pass
 
     @staticmethod
-    def get_data_by_url(url):
-        answer = requests.get(url, headers=HEADERS)
-        if answer.status_code == 200:
-            return answer
+    def get_data_by_url(url) -> Any:
+        response = requests.get(url, headers=HEADERS)
+        if response.status_code == 200:
+            return response
         else:
             logger.warning(f"Not get data by api: "
-                           f"status_code: {answer.status_code}; "
+                           f"status_code: {response.status_code}; "
                            f"url {url}; "
-                           f"answer_json: {answer.json()} ")
+                           f"answer_json: {response.json()} ")
+
+
+class WorkerGetTop(Worker):
+    """Worker for get top twenty repos with max stars"""
+
+    def run(self, *args, **kwargs) -> Any:
+        logger.info(f"Get top twenty repos max stars")
+
+        data = kwargs.get("data", [])
+        if data:
+            return sorted(data,
+                          key=lambda repo: repo["stargazers_count"],
+                          reverse=True)[:20]
+        else:
+            logger.info("List repos is empty")
+
+
+class WorkerWriteDataToDB(Worker):
+    """This worker will write some date to db"""
+
+    def run(self, *args, **kwargs) -> Any:
+
+        data = kwargs.get("data", [])
+        if data:
+            session = DB()
+            session.write_db(data)
+        else:
+            logger.info("Data for write is empty")
 
 
 class WorkerOrgs(Worker):
@@ -49,6 +78,7 @@ class WorkerOrgs(Worker):
             self.max_orgs_on_page = self.quantity_orgs
         self.url_orgs = f"https://api.github.com/organizations?per_page={self.max_orgs_on_page}"
         self.quantity_iter = self._get_quantity_iter()
+        self.list_orgs = []
 
     def _get_quantity_iter(self):
         quantity_iter = self.quantity_orgs // self.max_orgs_on_page
@@ -57,27 +87,26 @@ class WorkerOrgs(Worker):
             quantity_iter += 1
         return quantity_iter
 
-    def get_list(self):
+    def run(self, *args, **kwargs) -> Any:
         logger.info("Start get info about organisations.")
-        tmp_list_orgs = []
         for _ in range(self.quantity_iter):
             answer_orgs = self.get_data_by_url(self.url_orgs)
             if answer_orgs:
-                tmp_list_orgs.extend(answer_orgs.json())
+                self.list_orgs.extend(answer_orgs.json())
                 if answer_orgs.links.get("next", None):
                     self.url_orgs = answer_orgs.links.get("next")["url"]
                 else:
                     break
 
         logger.info("Organizations list got.")
-        return tmp_list_orgs
+        return self.list_orgs
 
 
 class WorkerRepos(Worker):
     """Default worker for repos"""
-    def __init__(self, list_orgs: list):
+    def __init__(self):
         super().__init__()
-        self.list_orgs = list_orgs
+        self.list_orgs = []
         self.list_repos = []
         self.count_limit_request = 5  # You can put biggest number limit requests for repos
 
@@ -102,9 +131,9 @@ class WorkerRepos(Worker):
             count += 1
         return tmp_list
 
-    def _start_parallel_executer_job(self, executor):
+    def _start_parallel_executer_job(self, executor, list_orgs):
         """It for thread and process"""
-        future_repos = {executor.submit(self._get_list_repos, orgs): orgs for orgs in self.list_orgs}
+        future_repos = {executor.submit(self._get_list_repos, orgs): orgs for orgs in list_orgs}
         for future in as_completed(future_repos):
             orgs_login = future_repos[future]["login"]
             try:
@@ -120,8 +149,10 @@ class WorkerRepos(Worker):
 class WorkerReposSimple(WorkerRepos):
     """Worker for get repos without parallal"""
 
-    def get_list(self):
+    def run(self, *args, **kwargs) -> Any:
         logger.info("Start get info about repo each organization.")
+
+        self.list_orgs = kwargs.get("data", [])
 
         for orgs in self.list_orgs:
             self.list_repos.extend(self._get_list_repos(orgs))
@@ -133,10 +164,12 @@ class WorkerReposSimple(WorkerRepos):
 class WorkerReposThread(WorkerRepos):
     """Worker for get repos with thread"""
 
-    def get_list(self):
+    def run(self, *args, **kwargs) -> Any:
         logger.info("Start executor with thread parallal processing data")
+
+        self.list_orgs = kwargs.get("data", [])
         with ThreadPoolExecutor(max_workers=5) as executor:
-            self._start_parallel_executer_job(executor)
+            self._start_parallel_executer_job(executor=executor, list_orgs=kwargs.get("data", []))
         logger.info("Thread completed")
         return self.list_repos
 
@@ -144,14 +177,56 @@ class WorkerReposThread(WorkerRepos):
 class WorkerReposProcess(WorkerRepos):
     """Worker for get repos with process"""
 
-    def __init__(self, list_orgs: list):
-        super().__init__(list_orgs)
+    def __init__(self):
+        super().__init__()
         self.cpu_count = os.cpu_count()
 
-    def get_list(self):
+    def run(self, *args, **kwargs) -> Any:
         logger.info("Start executor with process parallal processing data")
         with ProcessPoolExecutor(max_workers=self.cpu_count) as executor:
-            self._start_parallel_executer_job(executor)
+            self._start_parallel_executer_job(executor=executor, list_orgs=kwargs.get("data", []))
         logger.info("Process completed")
         return self.list_repos
 
+
+class WorkerAsyncRepos(WorkerRepos):
+    """Worker for async processing data"""
+
+    def run(self, *args, **kwargs):
+        logger.info("Start get info about repo each organization.")
+
+        self.list_orgs = kwargs.get("data", [])
+
+        futures = [self._start_async_executer_job(url) for url in self.list_orgs]
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(futures))
+
+        logger.info("Repo list got.")
+        return self.list_repos
+
+    async def _start_async_executer_job(self, orgs):
+        tmp_list = []
+        url_repos = orgs["repos_url"]
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
+            response_json = await self.async_get_data_by_url(session, url_repos)
+            if response_json:
+                tmp_list.extend(sorted(response_json,
+                                       key=lambda repo: repo["stargazers_count"],
+                                       reverse=True)[:20])
+        self.list_repos.extend(tmp_list)
+
+    @staticmethod
+    async def async_get_data_by_url(session, url) -> Any:
+        async with session.get(url) as response:
+            if response.status == 200:
+                return await response.json()
+            elif response.status == 403:
+                logger.warning(f"Not get data by api: "
+                               f"status_code: 403; "
+                               f"url {url};")
+                exit()
+            else:
+                logger.warning(f"Not get data by api: "
+                               f"status_code: {response.status}; "
+                               f"url {url}; "
+                               f"answer_json: {response.text()} ")

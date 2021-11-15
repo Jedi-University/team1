@@ -1,5 +1,6 @@
-
-from workers.worker import WorkerOrgs, WorkerReposSimple, WorkerReposThread, WorkerReposProcess
+from github_api_cls.db.db_setting import DB
+from workers.worker import WorkerOrgs, WorkerReposSimple, WorkerWriteDataToDB, \
+    WorkerReposThread, WorkerReposProcess, WorkerGetTop, WorkerAsyncRepos
 from orchestrators.orch_main import Orchestrator
 import time
 
@@ -15,7 +16,6 @@ class Main:
         self.start_time = None
         self.end_time = None
         self.orchestrator = Orchestrator()
-        self.orgs = WorkerOrgs(self.quantity_orgs)
         self.top_twenty_repos = []
 
     def start_app(self, mode):
@@ -26,21 +26,24 @@ class Main:
         self.start_time = time.time()
         logger.info(f"Start app with mode '{mode}'.")
 
-        list_orgs = self.orchestrator.start_worker(self.orgs)
-
-        repos = {
-            "simple": WorkerReposSimple(list_orgs),
-            "thread": WorkerReposThread(list_orgs),
-            "process": WorkerReposProcess(list_orgs)
+        worker_repos = {
+            "simple": WorkerReposSimple(),
+            "thread": WorkerReposThread(),
+            "process": WorkerReposProcess(),
+            "async": WorkerAsyncRepos(),
         }
 
-        list_repos = self.orchestrator.start_worker(repos[mode])
-        if list_repos:
-            self.top_twenty_repos = self.orchestrator.get_top_twenty_repos(list_repos)
-            self.orchestrator.write_data_to_db(self.top_twenty_repos)
-            self.orchestrator.show_all_data()
-        else:
-            logger.warning("list_repos is empty")
+        workers = [
+            WorkerOrgs(self.quantity_orgs),
+            worker_repos[mode],
+            WorkerGetTop(),
+            WorkerWriteDataToDB()
+        ]
+
+        self.orchestrator.schedule(workers)
+
+        session = DB()
+        session.show_all()
 
         self.end_time = time.time()
         logger.info(f"App with mode '{mode}' successfully passed. Time ran: {round(self.end_time - self.start_time, 2)} sec.")
@@ -60,6 +63,7 @@ if __name__ == "__main__":
     QUANTITY_ORGS = 200
 
     main = Main(QUANTITY_ORGS)
-    # main.start_app("simple")
+    main.start_app("simple")
     # main.start_app("thread")
-    main.start_app("process")
+    # main.start_app("process")
+    # main.start_app("async")
