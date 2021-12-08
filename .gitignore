@@ -7,3 +7,7 @@ data.json
 *.log
 !github_api.log
 .env
+/docker/
+/clicks/hadoop/
+/clicks/source/
+/clicks/tmp/

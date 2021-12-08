@@ -2,3 +2,4 @@ sqlalchemy
 beautifultable
 python-decouple
 aiohttp
+mrjob==0.7.4
