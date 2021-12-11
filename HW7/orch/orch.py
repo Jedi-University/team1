@@ -4,7 +4,11 @@
 __version__ = '0.1'
 __author__ = 'Popova Irene'
 
-from workers.workers import WorkerFetchOrg, WorkerFetchRep, WorkerStore, WorkerShow
+from workers.workerfetchorg import WorkerFetchOrg 
+from workers.workerfetchrep import WorkerFetchRep
+from workers.workerstore import WorkerStore
+from workers.workershow import WorkerShow
+
 
 
 class Orch():
@@ -13,14 +17,14 @@ class Orch():
         self.workers = workers
         self.parameters = parameters
 
-    def SetWorkerParameter(self, PairChange: dict):
-        self.parameters.update(PairChange)
+    def set_worker_parameter(self, pair_change: dict):
+        self.parameters.update(pair_change)
 
-    def Run(self):
+    def run(self):
         for i in self.workers:
            if self.status:
-               i.UpdateParameters(self.parameters)
-               i.Run()
+               i.update_parameters(self.parameters)
+               i.run()
                self.status = i.status
                if len(i.out_result) > 0 :
                    self.parameters.update(i.out_result)

@@ -7,10 +7,12 @@
 2 команда: show достает из базы ТОП и выводит на экран. 
 В качестве базы нужно использовать sqllite.
 """
-from github_object.my_objects import RepoGithub, OrgGithub
-from db.db import db
+
 from orch.orch import Orch
-from workers.workers import WorkerFetchOrg, WorkerFetchRep, WorkerStore, WorkerShow
+from workers.workerfetchorg import WorkerFetchOrg 
+from workers.workerfetchrep import WorkerFetchRep
+from workers.workerstore import WorkerStore
+from workers.workershow import WorkerShow
 
 # задаем имя бызы данных sqlite
 my_home_db = 'sqlite:///homework.db'    
@@ -34,4 +36,4 @@ app_workers = [worker1, worker2, worker3, worker4]
 # определяем оркестратор для реализации воркеров
 app_orch = Orch(app_workers,app_parameters)
 # запускаем оркестратор для реализации воркеров
-app_orch.Run()
+app_orch.run()
